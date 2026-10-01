@@ -103,6 +103,23 @@ class ValidationTests(unittest.TestCase):
         self.skill.write_text(self.skill.read_text().replace("---\n#", "allowed-tools: shell\n---\n#"))
         self.rejected("skills/code-simplifier/SKILL.md")
 
+    def test_nested_label_escape_rejected(self):
+        self.skill.write_text(self.skill.read_text() + "\n[escape [nested label]](../../outside.md)\n")
+        self.rejected("skills/code-simplifier/SKILL.md")
+
+    def test_nested_label_missing_reference_rejected(self):
+        self.skill.write_text(self.skill.read_text() + "\n[missing [nested label]](references/missing.md)\n")
+        self.rejected("skills/code-simplifier/SKILL.md")
+
+    def test_nested_label_existing_resource_is_allowed(self):
+        self.skill.write_text(self.skill.read_text() + "\n[example [nested label]](references/examples.md)\n")
+        self.assertEqual(validate_repository(self.root), [])
+
+    def test_parenthesized_resource_filename_is_allowed(self):
+        (self.skill.parent / "references/example(v1).md").write_text("# Example\n")
+        self.skill.write_text(self.skill.read_text() + "\n[example](references/example(v1).md)\n")
+        self.assertEqual(validate_repository(self.root), [])
+
 
 if __name__ == "__main__":
     unittest.main()

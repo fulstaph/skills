@@ -67,6 +67,9 @@ To add a skill, create `skills/<name>/SKILL.md`, add relative resources as neede
 update both the catalog and this table, and provide representative manual
 evaluations. Keep host-specific details outside the shared package. Run the
 local checks before submitting changes.
+Packaging rejects a skill named `agent-skills` because its standalone archive
+would collide with the marketplace archive. Required references must survive
+archive filtering; links into excluded scratch/cache directories fail packaging.
 
 ## Versioning and releases
 

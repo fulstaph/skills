@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
+import string
 from urllib.parse import unquote, urlsplit
 
 import yaml
@@ -70,13 +71,47 @@ def frontmatter(path: Path) -> dict:
     return data
 
 
+def link_destination(text: str, start: int) -> str:
+    """Read angle or bare destinations, preserving balanced URL parentheses."""
+    while start < len(text) and text[start].isspace():
+        start += 1
+    angle = start < len(text) and text[start] == "<"
+    if angle:
+        start += 1
+    result, depth = [], 0
+    while start < len(text):
+        char = text[start]
+        if char == "\\" and start + 1 < len(text) and text[start + 1] in string.punctuation:
+            result.append(text[start + 1])
+            start += 2
+            continue
+        if angle:
+            if char == ">" or char in "\r\n":
+                break
+        elif char.isspace() or (char == ")" and depth == 0):
+            break
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        result.append(char)
+        start += 1
+    return "".join(result)
+
+
 def markdown_targets(text: str):
-    # Fenced examples are not resource references. Support inline and reference links.
+    # Ignore code examples. Scan destinations independently of label nesting;
+    # this is deliberately conservative about malformed labels, too.
     text = re.sub(r"(?m)^(`{3,}|~{3,})[^\n]*\n.*?^\1[^\n]*$", "", text, flags=re.S)
-    for match in re.finditer(r"\[[^\]\n]*\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)", text):
-        yield match.group(1).strip("<>")
-    for match in re.finditer(r"(?m)^\s{0,3}\[[^\]]+\]:\s*(<[^>]+>|\S+)", text):
-        yield match.group(1).strip("<>")
+    text = re.sub(r"(`+)(.*?)\1", "", text, flags=re.S)
+    for match in re.finditer(r"\]\(", text):
+        target = link_destination(text, match.end())
+        if target:
+            yield target
+    for match in re.finditer(r"(?m)^[ \t]{0,3}\[[^\n]+\]:[ \t]*", text):
+        target = link_destination(text, match.end())
+        if target:
+            yield target
 
 
 def validate_repository(root: Path, expected_tag: str | None = None) -> list[str]:

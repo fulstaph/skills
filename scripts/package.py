@@ -6,11 +6,12 @@ from pathlib import Path
 import re
 import tempfile
 import zipfile
+from urllib.parse import unquote, urlsplit
 
 if __package__:
-    from .validate import has_symlink, is_within, read_text, validate_repository
+    from .validate import has_symlink, is_within, markdown_targets, read_text, validate_repository
 else:
-    from validate import has_symlink, is_within, read_text, validate_repository
+    from validate import has_symlink, is_within, markdown_targets, read_text, validate_repository
 
 
 FIXED_FILES = (
@@ -71,7 +72,9 @@ def package_release(root: Path, destination: Path, tag: str) -> list[Path]:
     files = [root / relative for relative in FIXED_FILES]
     if (root / "LICENSE").exists() or (root / "LICENSE").is_symlink():
         files.append(root / "LICENSE")
-    for directory in (root / "skills", root / "docs/integrations"):
+    directories = [root / skill["path"] for skill in catalog["skills"]]
+    directories.append(root / "docs/integrations")
+    for directory in directories:
         if directory.exists() or directory.is_symlink():
             files.extend(package_files(root, directory))
     # Read every selected file before writing; failures cannot leave partial archives.
@@ -82,10 +85,28 @@ def package_release(root: Path, destination: Path, tag: str) -> list[Path]:
         if not path.is_file():
             raise ValueError(f"{path.relative_to(root)}: expected a regular file")
         contents[path.relative_to(root).as_posix()] = path.read_bytes()
+    # Source validity alone cannot prove that filtered archive members are complete.
+    for skill in catalog["skills"]:
+        prefix = skill["path"] + "/"
+        if prefix + "SKILL.md" not in contents:
+            raise ValueError(f"{prefix}SKILL.md: required skill entrypoint excluded from archives")
+        for relative, data in contents.items():
+            if not relative.startswith(prefix) or not relative.endswith(".md"):
+                continue
+            for target in markdown_targets(data.decode("utf-8")):
+                url = urlsplit(target)
+                if target.startswith("#") or url.scheme or url.netloc:
+                    continue
+                required = ((root / relative).parent / unquote(url.path)).resolve().relative_to(root.resolve()).as_posix()
+                if required not in contents:
+                    raise ValueError(f"{relative}: referenced resource {required} excluded from archives")
     builds = {f"agent-skills-{version}.zip": [("agent-skills/" + p, data) for p, data in contents.items()]}
     for skill in catalog["skills"]:
         prefix = skill["path"] + "/"
-        builds[f'{skill["name"]}-{version}.zip'] = [
+        archive_name = f'{skill["name"]}-{version}.zip'
+        if archive_name in builds:
+            raise ValueError(f"catalog.json: archive name collision: {archive_name}; choose a different skill name")
+        builds[archive_name] = [
             (skill["name"] + "/" + p[len(prefix):], data)
             for p, data in contents.items() if p.startswith(prefix)
         ]

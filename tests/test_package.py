@@ -1,10 +1,11 @@
 from pathlib import Path
+import json
 import tempfile
 import unittest
 import zipfile
 
 from scripts.package import package_release, release_notes
-from tests.helpers import make_repository
+from tests.helpers import make_repository, write_json
 
 
 class PackagingTests(unittest.TestCase):
@@ -77,6 +78,42 @@ class PackagingTests(unittest.TestCase):
         first = {p.name: p.read_bytes() for p in package_release(self.root, self.output, "v0.1.0")}
         second = {p.name: p.read_bytes() for p in package_release(self.root, self.output / "other", "v0.1.0")}
         self.assertEqual(first, second)
+
+    def rename_skill(self, name):
+        old = self.root / "skills/code-simplifier"
+        new = self.root / "skills" / name
+        old.rename(new)
+        skill = new / "SKILL.md"
+        skill.write_text(skill.read_text().replace('name: "code-simplifier"', f'name: "{name}"'))
+        catalog = json.loads((self.root / "catalog.json").read_text())
+        catalog["skills"][0].update(name=name, path="skills/" + name)
+        write_json(self.root / "catalog.json", catalog)
+
+    def test_excluded_referenced_resource_prevents_artifacts(self):
+        skill = self.root / "skills/code-simplifier"
+        resource = skill / "references/dist/example.md"
+        resource.parent.mkdir()
+        resource.write_text("# Required example\n")
+        with (skill / "SKILL.md").open("a") as stream:
+            stream.write("\n[required](references/dist/example.md)\n")
+        with self.assertRaisesRegex(ValueError, "references/dist/example.md"):
+            package_release(self.root, self.output, "v0.1.0")
+        self.assertFalse(self.output.exists())
+
+    def test_skill_named_dist_is_packaged_completely(self):
+        self.rename_skill("dist")
+        archives = package_release(self.root, self.output, "v0.1.0")
+        with zipfile.ZipFile(next(p for p in archives if p.name == "dist-0.1.0.zip")) as archive:
+            self.assertIn("dist/SKILL.md", archive.namelist())
+            self.assertIn("dist/references/examples.md", archive.namelist())
+        with zipfile.ZipFile(next(p for p in archives if p.name == "agent-skills-0.1.0.zip")) as archive:
+            self.assertIn("agent-skills/skills/dist/SKILL.md", archive.namelist())
+
+    def test_archive_name_collision_prevents_artifacts(self):
+        self.rename_skill("agent-skills")
+        with self.assertRaisesRegex(ValueError, "archive.*colli"):
+            package_release(self.root, self.output, "v0.1.0")
+        self.assertFalse(self.output.exists())
 
 
 if __name__ == "__main__":
