@@ -15,6 +15,8 @@ The user additionally requested agent portability, Git-based distribution and ve
 
 The user approved treating the repository as a curated, Git-backed skill marketplace, including both Codex and Claude Code marketplace integrations in the first release. `code-simplifier` is its first skill. The initial marketplace is a repository catalog with native installation adapters; future skills can use the same layout and release process.
 
+The user also approved automated repository validation and tagged-release publishing, with agent evaluations run manually before releasing changes to a skill. CI/CD configuration is part of the source repository and introduces no runtime requirement for installed skills.
+
 ## Selected approach
 
 Use a concise guided workflow with concrete boundaries and examples. A rules-only checklist offers less guidance for scope and verification; a tooling-driven system adds dependencies and favors particular languages. A guided skill can use the tools already available in a project without requiring new infrastructure.
@@ -62,6 +64,9 @@ skills/
   .codex-plugin/plugin.json
   .claude-plugin/marketplace.json
   .claude-plugin/plugin.json
+  .github/workflows/
+    ci.yml
+    release.yml
   skills/code-simplifier/
     SKILL.md
     references/examples.md
@@ -71,6 +76,8 @@ skills/
   docs/superpowers/specs/
   docs/superpowers/plans/
   evals/
+  scripts/
+  tests/
 ```
 
 Codex's marketplace adapter follows the current installed marketplace format at `.agents/plugins/marketplace.json`, paired with `.codex-plugin/plugin.json`. The local Codex CLI supports registration of local or Git marketplace sources. Use its available commands to confirm discovery, registration, installation, and loaded skill paths during implementation.
@@ -88,6 +95,31 @@ Distribute the marketplace through local registration initially and through the 
 The repository supplies immutable release tags and documents deliberate, version-aware updates. Native marketplace clients manage their own caches and update behavior; describe and verify each available host's mechanism rather than claiming all clients automatically pin the same way. Direct-copy updates preserve local modifications: inspect the installed copy, back it up if necessary, and replace it with the selected release. The existing Codex skill installer rejects an already-existing destination; it does not provide automatic upgrades. Do not add a custom runtime updater.
 
 The current request creates a local Git repository. Remote hosting, visibility, and publication licensing are selected when publication is requested.
+
+## CI/CD and evaluation policy
+
+Use GitHub Actions for repository CI and release publishing once the repository is hosted on GitHub. Keep the same deterministic validation and packaging commands runnable locally, so the repository remains usable before remote setup and with another Git host.
+
+The CI workflow runs on pull requests and pushes to `main`. It checks:
+
+- Shared skill frontmatter, directory names, required metadata, and resource references.
+- Unique catalog entries, agreement with skill metadata, and package paths contained in the repository.
+- Native marketplace/plugin manifest structure, names, component paths, and shared-package discovery configuration.
+- Release version consistency across `VERSION`, the catalog, and emitted native version fields.
+- Focused tests of the validation and packaging helpers, including invalid metadata, missing files, and inconsistent versions.
+- Executable evaluation-fixture checks where provided. These verify behavior specifications and evaluation helpers; they do not by themselves demonstrate that an agent followed the skill successfully.
+
+Use native host validators where the runner supports them without agent credentials. Otherwise, repository checks cover the manifest structure and paths, and native validation/loading is reported separately from the local smoke checks. CI must not silently present structural checks as proof of native loading.
+
+Agent evaluations remain a manual development and pre-release step initially. Run representative prompts in a fresh context against the candidate skill and a baseline or previous version, then assess concrete outputs. For refactoring cases, run behavioral tests against the produced patch and inspect readability, scope, and interface preservation. Record the skill revision, agent/model when known, scenarios, executed checks, results, and limitations. The [Agent Skills evaluation guide](https://agentskills.io/skill-creation/evaluating-skills) supplies the baseline-comparison approach. Paid agent calls are not part of automatic PR CI.
+
+Before releasing changed skill instructions, run the relevant manual evaluations and review their evidence. Keep this human release requirement distinct from automated schema and fixture checks. The initial release evaluates the acceptance scenarios described below.
+
+The release workflow runs when a maintainer pushes a version tag in the form `vX.Y.Z`. It reruns deterministic validation, verifies that the tag agrees with release metadata and the corresponding changelog entry, and builds a marketplace archive plus separate portable skill archives from the tagged source. Publish a GitHub Release containing those archives and release notes only after verification passes. Include the native manifest directories in the marketplace archive and retain the directory structure of each standalone skill.
+
+CI uses read-only repository permissions. Only the release-publishing job receives repository-content write permission. Publication uses the repository's normal workflow credentials; no agent API credentials are needed for these two workflows. A future evaluation automation can be designed separately if manual evaluation becomes a bottleneck.
+
+Local validation, archive creation, and workflow review are part of implementation verification. Running hosted Actions or publishing a GitHub Release requires a configured remote and an authorized push. Report that distinction explicitly while the repository remains local.
 
 ## Invocation and scope
 
@@ -163,10 +195,11 @@ Evaluate representative scenarios rather than only checking the instruction text
 6. Missing subagents or unavailable tests produce an honest limitation report without a false verification claim.
 7. An agent without Codex tools can follow the core workflow; host-specific setup and invocation stay in integration documentation.
 8. Both native adapters expose the same shared package, custom catalog entries resolve to existing skills, and release metadata agrees across all representations.
+9. Local deterministic CI commands pass; validation rejects malformed packages; release archives contain the expected shared and native files; and a mismatched release tag is rejected. Hosted workflow execution and publication are recorded separately from local checks.
 
 Use focused executable before/after checks for scenarios with concrete behavioral claims. Record what was executed, what was inspected, and what remains unverified. Revise the skill if an evaluation reveals a failure.
 
-Acceptance requires a valid, concise Agent Skills package in the requested Git repository; behavior-preserving structural scope; no mandatory host-specific capabilities or new dependencies in the skill; optional read-only subagent review with a fallback; a consistent human and machine-readable catalog; validated Codex and Claude Code marketplace integrations; documented releases and installation; and a retained portable copy plus a confirmed first Codex native installation, or a clear report of a specific installation block. Report the exact extent of Claude Code loading verification.
+Acceptance requires a valid, concise Agent Skills package in the requested Git repository; behavior-preserving structural scope; no mandatory host-specific capabilities or new dependencies in the skill; optional read-only subagent review with a fallback; a consistent human and machine-readable catalog; validated Codex and Claude Code marketplace integrations; CI and release workflows with passing local validation and packaging checks; documented manual evaluation evidence; documented releases and installation; and a retained portable copy plus a confirmed first Codex native installation, or a clear report of a specific installation block. Report the exact extent of Claude Code loading verification and hosted CI/CD execution.
 
 ## Review and implementation handoff
 

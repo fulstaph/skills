@@ -15,3 +15,9 @@ Shared instructions use ordinary capabilities rather than agent-specific tool na
 Git history tracks source changes. Validated releases will use repository-wide semantic version tags, starting at `v0.1.0`, and a changelog explaining behavioral changes. Release metadata will stay consistent across the root version file, catalog, and native plugin manifests. The current documentation-only repository is not a released marketplace bundle.
 
 Installations use the skill directory from a selected release. Preserve local modifications when updating an installed copy. Remote publication and licensing can be configured when the repository is ready to share.
+
+## Validation and releases
+
+The approved design includes GitHub Actions for deterministic validation on pull requests and main-branch updates, plus tagged-release packaging and publication. The same checks and packaging commands will run locally before remote setup.
+
+Agent evaluations remain manual initially: representative refactoring runs, behavioral checks, and output review provide evidence before releasing changed skill instructions. Automatic metadata and fixture checks are reported separately from actual agent evaluations and native marketplace loading.
