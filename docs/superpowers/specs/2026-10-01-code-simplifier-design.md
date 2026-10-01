@@ -1,0 +1,137 @@
+# Agent-Agnostic Code Simplifier Skill Design
+
+Date: 2026-10-01
+Status: Ready for written-spec review
+
+## Purpose and agreed intent
+
+Create a general-purpose, agent-agnostic skill named `code-simplifier` that refactors a user-selected file or module to reduce complexity and improve readability and maintainability. Keep its source in the local Git repository `/Users/georgy_bokovikov/coding/skills`.
+
+The user selected structural refactoring: the skill may extract helpers and reorganize responsibilities while preserving behavior and public interfaces. It adapts to each project's language, framework, and conventions. The user approved an optional independent subagent review for larger or behaviorally subtle changes.
+
+The design assumes explicit invocation and direct editing. Both assumptions were presented as part of the approved design. The skill is a reusable instruction package, not a separate program or a language-specific static-analysis tool.
+
+The user additionally requested agent portability, Git-based distribution and versioning, and creation of a repository named `skills` in their `coding` directory. Codex is the first installation target; the shared instructions must not depend on Codex.
+
+## Selected approach
+
+Use a concise guided workflow with concrete boundaries and examples. A rules-only checklist offers less guidance for scope and verification; a tooling-driven system adds dependencies and favors particular languages. A guided skill can use the tools already available in a project without requiring new infrastructure.
+
+The installed ECC `code-simplifier` agent is a local reference for clarity and consistency principles. Its default focus on recently modified code differs from this skill's explicit file-or-module scope. The new skill must express the agreed workflow independently and omit unrelated agent instructions.
+
+## Repository, package, and portability
+
+The canonical source repository is `/Users/georgy_bokovikov/coding/skills`, with the skill in `skills/code-simplifier/`. Its package contains:
+
+- `SKILL.md`: discovery metadata, invocation guidance, refactoring workflow, invariants, subagent policy, and completion requirements.
+- `references/examples.md`: short examples showing useful structural simplification and tempting changes that alter behavior.
+
+Follow the shared [Agent Skills specification](https://agentskills.io/specification): YAML frontmatter with `name` and `description`, followed by Markdown instructions and relative resource links. The skill name must match its directory name. Keep the main instructions concise and load examples only when useful.
+
+Use ordinary capability descriptions such as reading files, editing code, running project checks, and delegating a review. Do not require host-specific tool names, model identifiers, native invocation syntax, absolute machine paths, or another installed skill. Do not use experimental tool-allowlist metadata in the shared package. Optional reviewers remain capability-dependent.
+
+Agent Skills-compatible hosts can discover the package using their supported installation mechanism. Other coding agents can be explicitly directed to read and follow `SKILL.md`; automatic discovery and native invocation are not promised for every host.
+
+Agent-specific setup belongs in separate repository integration documentation. Codex display metadata is optional, not a required core file. The initial shared package omits `agents/openai.yaml`; a future host-specific overlay may add it without changing the shared workflow. Explicit invocation is expressed in the shared description and body. A host may additionally support metadata that enforces explicit-only activation, but the shared format alone does not enforce that policy.
+
+Do not add executable scripts, dependencies, or language-specific configuration to the installed skill. Evaluation fixtures and validation tooling may live separately in the source repository.
+
+Repository documentation comprises a README for purpose, installation, and invocation; a changelog for releases; this design spec; and the implementation plan after its review gate. Keep representative evaluation scenarios and results alongside the source, outside the installed skill directory.
+
+After implementation validation, install the skill in the personal skill directory, `~/.codex/skills/code-simplifier/`, so it can be used across projects. Check for an existing installation before writing and preserve any existing content rather than silently replacing it. Retain the portable deliverable in the workspace. Do not change the cached ECC or Superpowers plugins.
+
+Retain a portable copy at `outputs/code-simplifier/` and keep this spec's user-facing copy synchronized with the repository document. The Git repository is the source of truth; installed copies are release artifacts, and changes made there must be brought back into source before release.
+
+## Versioning and distribution
+
+Use Git history for changes and repository-wide semantic release tags, beginning with `v0.1.0` after validation. Do not tag the incomplete documentation-only repository as a release. Patch versions clarify or correct instructions within the existing contract; minor versions add compatible capabilities; major versions change defaults, scope, or required capabilities. The changelog explains relevant behavior changes and verification evidence.
+
+Distribute a release by sharing or copying the skill directory from a pinned Git tag. A GitHub remote can additionally support the existing Codex repository/path/ref installer. The installer is a host integration, not a dependency of the shared skill. Other agents use their documented discovery or installation paths.
+
+Updates are deliberate and preserve local modifications: inspect the installed copy, back it up if necessary, and replace it with the selected release. The existing Codex installer rejects an already-existing destination; it does not provide automatic upgrades. Do not add a runtime updater.
+
+The current request creates a local Git repository. Remote hosting, visibility, and publication licensing are selected when publication is requested.
+
+## Invocation and scope
+
+Typical use: invoke the skill by the host's supported mechanism and provide a file, directory representing a module, or a clearly identified module in the current conversation. Codex's `$code-simplifier` syntax belongs in its integration documentation rather than the shared workflow.
+
+Use the explicit target or an unambiguous target already established by the user. If neither exists, ask one focused question before editing. Do not silently fall back to all recently changed files or the whole repository.
+
+Read adjacent callers, tests, configuration, and contracts to understand the target. Edits stay within the selected target and the minimum supporting files necessary for the same refactor, such as a colocated helper or a focused test. If a change requires unrelated work, a public-interface change, or an expansion to another subsystem, leave that change as a proposal and continue any independent simplifications already within scope.
+
+## Refactoring workflow
+
+1. Read applicable project instructions and inspect the working-tree state. Identify and preserve the user's existing edits.
+2. Inspect the selected code, relevant callers, tests, and language or framework conventions. Identify public boundaries and behavior that must stay stable.
+3. Establish the relevant verification baseline using available project checks. Inspect a failure enough to distinguish an existing problem from one introduced by the refactor; do not fix unrelated failures automatically.
+4. Identify a small set of improvements with a concrete readability benefit. Briefly communicate the intended edits and proceed within the authorized scope; the skill adds no routine approval gate of its own.
+5. Apply cohesive changes. Prefer clear control flow, descriptive internal names, useful responsibility boundaries, and fewer competing abstractions.
+6. Use optional independent review when warranted by the policy below. Resolve supported findings before completion.
+7. Run relevant checks and review the final diff for unintended behavior or scope changes. Report the resulting improvements and the verification evidence.
+
+## Simplification rules
+
+Useful changes include reducing unnecessary nesting, introducing guard clauses where equivalent, extracting helpers that name a coherent responsibility, clarifying internal names, removing redundant indirection, and consolidating genuinely equivalent duplicated logic.
+
+Extraction and consolidation are choices, not quotas. Keep straightforward code inline when a helper would add navigation or indirection without clarifying it. Do not create a generalized framework for a single use case. Do not optimize for the shortest code, line-count reduction, or a complexity score.
+
+Follow the existing project's idioms. Remove dead code or unused imports only when their lack of use and side effects is supported by evidence. Account for reflection, registries, dynamic loading, import-time execution, framework hooks, and generated interfaces before removal. Do not remove logging, validation, error handling, or comments explaining constraints merely because they look verbose.
+
+## Behavior and interface invariants
+
+Preserve externally observable behavior, including return values, output formats, errors and their handling, validation, mutation, side effects and their ordering, resource cleanup, and contractual ordering or concurrency behavior.
+
+Preserve public exports, function signatures, protocols, serialization formats, and framework-discovered entry points. Renaming an internal implementation detail is allowed only when its actual consumers remain compatible. Avoid changing dependency versions or adding dependencies for a refactor.
+
+Treat transformations involving asynchronous code, lazy evaluation, truthiness, coercion, ownership, aliasing, evaluation order, floating-point operations, or resource lifetimes as behavior-sensitive. Inspect the semantics for the project's language before applying them. Do not mechanically replace callback chains with async/await or merge branches that have different effects.
+
+If equivalence cannot be established with reasonable evidence, keep the uncertain transformation out of the patch and explain the opportunity or verification gap. An empty patch is acceptable when the code is already clear or no supported improvement exists.
+
+## Optional subagent review
+
+The main agent owns scope, edits, tests, and integration. A single optional subagent provides a read-only independent review after the candidate refactor is available.
+
+Use the reviewer when the diff crosses interconnected files or changes logic with subtle state, errors, side-effect ordering, or asynchronous behavior. Ordinary local simplifications can remain with the main agent. Honor a user's request to enable or skip review.
+
+Give the reviewer the target, applicable instructions, preserved contracts, the original code or a trustworthy before/after comparison that includes pre-existing user edits, the candidate diff, and verification results. A Git HEAD comparison alone is insufficient if the original target already contained uncommitted changes. Ask for concrete findings about behavioral drift, interface changes, scope expansion, or abstractions that make the code harder to understand. Each finding should identify the code and a plausible behavioral or maintenance consequence.
+
+The reviewer must not edit files, spawn additional agents, or broaden the task. The main agent assesses each finding, resolves supported issues, and reruns checks affected by its corrections. Reviewer agreement supports the assessment; it does not replace tests or prove equivalence.
+
+If subagents are unavailable, perform the same review in the main agent and report that independent review was unavailable. Do not fail or require additional setup solely because subagent tooling is missing.
+
+## Verification and failure handling
+
+Use existing tests, type checks, builds, and lint checks that cover the changed code. Prefer focused checks; run broader checks when the project requires them or the refactor affects shared behavior. Do not install tools solely to satisfy a generic checklist.
+
+Add targeted behavioral or characterization tests when the transformation introduces material uncertainty and existing coverage does not resolve it. Avoid tests that simply mirror implementation details or exist only to accompany a low-impact edit.
+
+If a refactor introduces a failure, correct or remove the agent's failing change while preserving pre-existing user work. Do not use a blanket reset or revert of the entire working tree. Report pre-existing failures separately from introduced failures.
+
+When relevant checks cannot run, state the reason and distinguish static review from executed verification. Leave uncertain transformations unapplied. Never claim that behavior was proved unchanged just because checks passed.
+
+The completion response briefly states what became simpler, which checks ran and their outcome, any limitations or skipped transformations, and any independent review findings that remain unresolved. Do not create commits or pull requests automatically unless the user or project instructions authorize them.
+
+## Skill validation and acceptance criteria
+
+Validate the package's required frontmatter, naming, file references, and core instructions against the shared Agent Skills format using available validators during implementation. Check that the shared package has no host-specific tool or invocation requirements and that optional review degrades cleanly when unavailable. Separately verify the first Codex installation using local integration guidance.
+
+Evaluate representative scenarios rather than only checking the instruction text:
+
+1. A straightforward single-file refactor produces a readable equivalent result with no unnecessary helper hierarchy or subagent use.
+2. An interconnected module exercises the optional reviewer and retains public contracts, error behavior, and side-effect ordering.
+3. A second language exercises language-appropriate reasoning instead of applying JavaScript-specific habits everywhere.
+4. An ambiguous target prompts a focused scope question before any edit.
+5. A dynamic or framework-discovered entry point is retained despite appearing locally unused.
+6. Missing subagents or unavailable tests produce an honest limitation report without a false verification claim.
+7. An agent without Codex tools can follow the core workflow; host-specific setup and invocation stay in integration documentation.
+
+Use focused executable before/after checks for scenarios with concrete behavioral claims. Record what was executed, what was inspected, and what remains unverified. Revise the skill if an evaluation reveals a failure.
+
+Acceptance requires a valid, concise Agent Skills package in the requested Git repository; behavior-preserving structural scope; no mandatory host-specific capabilities or new dependencies; optional read-only subagent review with a fallback; documented releases and pinned distribution; and a retained portable copy plus a confirmed first Codex installation, or a clear report of a specific installation block.
+
+## Review and implementation handoff
+
+This spec is the next review artifact. Written-spec approval permits the Superpowers writing-plans stage. Implementation begins only after the user reviews the resulting implementation plan and selects its execution method, as required by the explicitly invoked brainstorming workflow.
+
+The requested local source repository now supplies version control for the design document. Keep the projectless workspace copy available for review, and record design approval before starting the implementation-plan stage.
