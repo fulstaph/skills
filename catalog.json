@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.0",
+  "skills": [
+    {
+      "name": "code-simplifier",
+      "description": "Simplify selected code for clarity and maintainability while preserving behavior and public interfaces. Use when explicitly asked to simplify or refactor a file, module, or defined change scope, including useful helper extraction and reducing unnecessary complexity.",
+      "path": "skills/code-simplifier",
+      "tags": ["coding", "refactoring", "readability"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "agent-skills",
+  "owner": {"name": "georgy_bokovikov"},
+  "metadata": {"description": "A curated collection of portable coding skills."},
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "version": "0.1.0",
+      "description": "Portable skills for clear, maintainable code.",
+      "source": "./"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "description": "Portable skills for clear, maintainable code.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Skills",
+    "shortDescription": "Simplify code while preserving behavior",
+    "developerName": "georgy_bokovikov"
+  }
+}

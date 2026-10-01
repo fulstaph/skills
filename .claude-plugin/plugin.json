@@ -1,0 +1,7 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "description": "Portable skills for clear, maintainable code.",
+  "author": {"name": "georgy_bokovikov"},
+  "skills": "./skills/"
+}
