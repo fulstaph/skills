@@ -1,25 +1,95 @@
-# Skills
+# Agent Skills
 
-A curated, Git-backed marketplace of reusable coding-agent skills built around the [Agent Skills format](https://agentskills.io/specification).
+A curated Git-backed marketplace of reusable coding-agent skills using the
+[Agent Skills format](https://agentskills.io/specification). Each portable
+package contains instructions and relative resources. Host-specific discovery
+lives in small native adapters outside the package.
 
-The first skill, `code-simplifier`, is being designed to simplify a selected file or module through structural refactoring while preserving behavior and public interfaces. It will support an optional independent review when the host provides subagents.
+## Catalog
 
-## Layout
+| Skill | Purpose | Optional capability |
+| --- | --- | --- |
+| [code-simplifier](skills/code-simplifier/SKILL.md) | Simplify a selected file, module, or change scope while preserving behavior and public interfaces | One read-only reviewer for subtle or interconnected changes |
 
-The design spec is available in `docs/superpowers/specs/2026-10-01-code-simplifier-design.md`. Implementation will place the portable package in `skills/code-simplifier/`, with evaluation material and agent-specific integration documentation kept outside that package. A human-readable catalog and a machine-readable `catalog.json` will index the shared packages.
+Ask the agent to use code-simplifier and name a target, for example:
+“Use code-simplifier to simplify the payment module while preserving behavior.”
+The skill can extract useful helpers and reorganize responsibilities within
+scope. It follows project conventions and reports actual checks and limitations.
 
-The implementation plan is available in `docs/superpowers/plans/2026-10-01-agent-skills-marketplace.md`. The design is approved; implementation starts after plan review and execution-method selection.
+## Install
 
-Shared instructions use ordinary capabilities rather than agent-specific tool names or invocation syntax. Codex and Claude Code marketplace adapters will each expose the same `agent-skills` bundle from this repository. Native discovery and invocation follow each host's supported mechanisms.
+The `agent-skills` marketplace exposes one bundle, `agent-skills`, backed by
+the shared `skills/` directory:
 
-## Versioning
+- [Codex native setup](docs/integrations/codex.md)
+- [Claude Code native setup](docs/integrations/claude-code.md)
+- Other compatible hosts: extract the standalone skill ZIP and copy the entire
+  `code-simplifier/` directory, including `references/`, into a supported skill
+  directory. Select a release deliberately and preserve local modifications.
 
-Git history tracks source changes. Validated releases will use repository-wide semantic version tags, starting at `v0.1.0`, and a changelog explaining behavioral changes. Release metadata will stay consistent across the root version file, catalog, and native plugin manifests. The current documentation-only repository is not a released marketplace bundle.
+Choose one installation route per host to avoid duplicate skills. Native skill
+selection follows host conventions. The core skill requires no other installed
+skill, executable dependency, or subagent support.
 
-Installations use the skill directory from a selected release. Preserve local modifications when updating an installed copy. Remote publication and licensing can be configured when the repository is ready to share.
+## Development checks
 
-## Validation and releases
+Repository tooling uses Python 3.12+ and PyYAML; the JavaScript behavior fixture
+uses Node.js 22+. These dependencies are not installed with the skill.
 
-The approved design includes GitHub Actions for deterministic validation on pull requests and main-branch updates, plus tagged-release packaging and publication. The same checks and packaging commands will run locally before remote setup.
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python scripts/validate.py --root .
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s evals/code-simplifier/fixtures/python-simple -v
+.venv/bin/python -m unittest discover -s evals/code-simplifier/fixtures/python-dynamic -v
+node --test evals/code-simplifier/fixtures/javascript-module/service.test.mjs
+.venv/bin/python scripts/package.py --root . --output dist --tag v0.1.0
+```
 
-Agent evaluations remain manual initially: representative refactoring runs, behavioral checks, and output review provide evidence before releasing changed skill instructions. Automatic metadata and fixture checks are reported separately from actual agent evaluations and native marketplace loading.
+On Windows use the virtual environment's `Scripts/python.exe` executable.
+Validation checks duplicate fields, skill metadata, relative resource containment,
+catalog completeness, native adapter identities, and release versions. Packaging
+creates `agent-skills-0.1.0.zip`, one ZIP per skill, and changelog-derived notes.
+Archives include native manifests and resources and exclude development files.
+
+## Catalog and contributions
+
+`catalog.json` is this repository's small discovery index, not a cross-host
+marketplace standard. Schema version 1 has a repository `version` and `skills`
+array. Each entry has `name`, `description`, `path` (`skills/<name>`), and `tags`.
+Name and description must match the package's frontmatter exactly. Every package
+appears once. Native adapters expose the whole curated bundle.
+
+To add a skill, create `skills/<name>/SKILL.md`, add relative resources as needed,
+update both the catalog and this table, and provide representative manual
+evaluations. Keep host-specific details outside the shared package. Run the
+local checks before submitting changes.
+
+## Versioning and releases
+
+All skills and adapters share `VERSION`, initially `0.1.0`, and repository tags
+of the form `vX.Y.Z`. Update the catalog, both plugin manifests, both marketplace
+plugin entries, and [CHANGELOG.md](CHANGELOG.md) together. Use patch versions for
+clarifications without intended behavior changes, minor versions for added
+skills/capabilities, and major versions for incompatible contracts. Before 1.0,
+document breaking changes explicitly even when using a minor release.
+
+CI checks pull requests and updates to `main` with read-only permissions. Tag
+releases repeat validation and tests, package the tagged source, and pass the
+same archives and notes to a separate publication job. Only that job has content
+write permission. Action revisions are pinned to official immutable commits.
+
+Before pushing a release tag, run [manual evaluations](evals/code-simplifier/README.md)
+with fresh candidate and baseline contexts, review their evidence, and smoke-test
+native adapters. Hosted CI checks metadata and original fixture behavior; it
+does not run paid agent evaluations or authenticated host sessions. These
+evidence categories are reported separately.
+
+This repository is local until publication is requested. To activate hosted
+CI/CD, choose a remote and license, push the reviewed branch, enable Actions,
+and push an approved version tag. No remote URL or license has been selected.
+
+The approved [design](docs/superpowers/specs/2026-10-01-code-simplifier-design.md)
+and [implementation plan](docs/superpowers/plans/2026-10-01-agent-skills-marketplace.md)
+record the initial decisions.
