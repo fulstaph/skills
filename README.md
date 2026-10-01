@@ -8,6 +8,8 @@ The first skill, `code-simplifier`, is being designed to simplify a selected fil
 
 The design spec is available in `docs/superpowers/specs/2026-10-01-code-simplifier-design.md`. Implementation will place the portable package in `skills/code-simplifier/`, with evaluation material and agent-specific integration documentation kept outside that package. A human-readable catalog and a machine-readable `catalog.json` will index the shared packages.
 
+The implementation plan is available in `docs/superpowers/plans/2026-10-01-agent-skills-marketplace.md`. The design is approved; implementation starts after plan review and execution-method selection.
+
 Shared instructions use ordinary capabilities rather than agent-specific tool names or invocation syntax. Codex and Claude Code marketplace adapters will each expose the same `agent-skills` bundle from this repository. Native discovery and invocation follow each host's supported mechanisms.
 
 ## Versioning

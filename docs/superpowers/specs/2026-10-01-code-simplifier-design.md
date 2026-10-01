@@ -1,7 +1,7 @@
 # Agent Skills Marketplace and Code Simplifier Design
 
 Date: 2026-10-01
-Status: Ready for written-spec review
+Status: Approved for implementation planning on 2026-10-01
 
 ## Purpose and agreed intent
 
