@@ -1,14 +1,14 @@
 # Codex
 
-The repository exposes the `agent-skills` plugin from the `agent-skills`
+The repository exposes the `coding-skills` plugin from the `coding-skills`
 marketplace. Its shared source is `skills/`.
 
 ## Local installation
 
 ```sh
 codex plugin marketplace add /Users/georgy_bokovikov/coding/skills --json
-codex plugin add agent-skills@agent-skills --json
-codex plugin list --marketplace agent-skills --json
+codex plugin add coding-skills@coding-skills --json
+codex plugin list --marketplace coding-skills --json
 ```
 
 Use your own checkout path on another machine. Inspect existing registrations

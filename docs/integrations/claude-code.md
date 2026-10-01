@@ -1,7 +1,7 @@
 # Claude Code
 
 Both native manifests expose the shared `skills/` directory through the
-`agent-skills@agent-skills` bundle.
+`coding-skills@coding-skills` bundle.
 
 ## Local installation
 
@@ -10,7 +10,7 @@ From the checkout:
 ```sh
 claude plugin validate .
 claude plugin marketplace add /path/to/skills
-claude plugin install agent-skills@agent-skills
+claude plugin install coding-skills@coding-skills
 claude plugin list --json
 ```
 
@@ -27,7 +27,7 @@ native verification extent are recorded in the release evaluation report.
 
 When published, register the actual Git source or a checked-out release tag.
 For an entirely local pinned install, extract `agent-skills-0.1.0.zip` and
-register its `agent-skills/` directory. Review later releases before replacing
+register its `coding-skills/` directory. Review later releases before replacing
 the pinned source and reinstalling the bundle. Consult the host's marketplace
 controls for updating registrations rather than assuming local copies refresh.
 

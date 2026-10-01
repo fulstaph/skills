@@ -18,7 +18,7 @@ scope. It follows project conventions and reports actual checks and limitations.
 
 ## Install
 
-The `agent-skills` marketplace exposes one bundle, `agent-skills`, backed by
+The `coding-skills` marketplace exposes one bundle, `coding-skills`, backed by
 the shared `skills/` directory:
 
 - [Codex native setup](docs/integrations/codex.md)

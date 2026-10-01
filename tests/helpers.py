@@ -29,18 +29,18 @@ def make_repository(root: Path) -> Path:
     })
     for host in ("codex", "claude"):
         write_json(root / f".{host}-plugin/plugin.json", {
-            "name": "agent-skills", "description": "Portable skills",
+            "name": "coding-skills", "description": "Portable skills",
             "version": "0.1.0", "skills": "./skills/"
         })
     write_json(root / ".agents/plugins/marketplace.json", {
-        "name": "agent-skills", "plugins": [{
-            "name": "agent-skills", "version": "0.1.0",
+        "name": "coding-skills", "plugins": [{
+            "name": "coding-skills", "version": "0.1.0",
             "source": {"source": "local", "path": "./"}
         }]
     })
     write_json(root / ".claude-plugin/marketplace.json", {
-        "name": "agent-skills", "owner": {"name": "Test Owner"}, "plugins": [{
-            "name": "agent-skills", "version": "0.1.0", "source": "./"
+        "name": "coding-skills", "owner": {"name": "Test Owner"}, "plugins": [{
+            "name": "coding-skills", "version": "0.1.0", "source": "./"
         }]
     })
     return root

@@ -1,9 +1,9 @@
 {
-  "name": "agent-skills",
+  "name": "coding-skills",
   "interface": {"displayName": "Agent Skills"},
   "plugins": [
     {
-      "name": "agent-skills",
+      "name": "coding-skills",
       "version": "0.1.0",
       "source": {"source": "local", "path": "./"},
       "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},

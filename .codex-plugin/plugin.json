@@ -1,5 +1,5 @@
 {
-  "name": "agent-skills",
+  "name": "coding-skills",
   "version": "0.1.0",
   "description": "Portable skills for clear, maintainable code.",
   "skills": "./skills/",

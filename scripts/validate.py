@@ -236,8 +236,8 @@ def validate_repository(root: Path, expected_tag: str | None = None) -> list[str
 
     for relative in (".codex-plugin/plugin.json", ".claude-plugin/plugin.json"):
         manifest = load_json(relative)
-        if manifest.get("name") != "agent-skills":
-            error(relative, "name must be agent-skills")
+        if manifest.get("name") != "coding-skills":
+            error(relative, "name must be coding-skills")
         if manifest.get("version") != version:
             error(relative, "version must match VERSION")
         if manifest.get("skills") not in ("./skills/", ["./skills/"]):
@@ -247,15 +247,15 @@ def validate_repository(root: Path, expected_tag: str | None = None) -> list[str
         (".claude-plugin/marketplace.json", "./"),
     ):
         marketplace = load_json(relative)
-        if marketplace.get("name") != "agent-skills":
-            error(relative, "marketplace name must be agent-skills")
+        if marketplace.get("name") != "coding-skills":
+            error(relative, "marketplace name must be coding-skills")
         plugins = marketplace.get("plugins")
         if not isinstance(plugins, list) or len(plugins) != 1 or not isinstance(plugins[0], dict):
-            error(relative, "plugins must contain one agent-skills bundle")
+            error(relative, "plugins must contain one coding-skills bundle")
             continue
         plugin = plugins[0]
-        if plugin.get("name") != "agent-skills":
-            error(relative, "plugin name must be agent-skills")
+        if plugin.get("name") != "coding-skills":
+            error(relative, "plugin name must be coding-skills")
         if plugin.get("version") != version:
             error(relative, "plugin version must match VERSION")
         if plugin.get("source") != source:
