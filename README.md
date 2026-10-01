@@ -35,6 +35,8 @@ skill, executable dependency, or subagent support.
 
 Repository tooling uses Python 3.12+ and PyYAML; the JavaScript behavior fixture
 uses Node.js 22+. These dependencies are not installed with the skill.
+Development commands and evaluation/design links apply to the full Git checkout.
+The marketplace ZIP contains the portable skills and integration guides.
 
 ```sh
 python3 -m venv .venv

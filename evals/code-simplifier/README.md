@@ -1,7 +1,8 @@
 # Code simplifier evaluations
 
-`cases.json` defines six scenarios. Three have executable fixtures; the other
-three exercise target clarification and honest reports under capability limits.
+`cases.json` defines six initial scenarios and one supplemental requested-review
+case. Three initial cases have executable fixtures; the other three exercise
+target clarification and honest reports under capability limits.
 Fixture tests establish the original contract, not the skill's effectiveness.
 
 Run baseline checks from the repository root:
@@ -24,5 +25,6 @@ prompts, checks and results, reviewer usage, and limitations in `results/`.
 Do not count author self-review or passing fixture tests as live evaluations.
 These small fixtures are a smoke evaluation, not broad proof of generality.
 
-Author self-review: the instructions cover all six scenario assertions. Live
-evaluation evidence will be recorded separately before the initial release.
+Author self-review covered the six initial scenario assertions. Actual
+[0.1.0 evidence](results/0.1.0.md) records seven candidate runs, three no-skill
+baseline runs, native smoke checks, and the limits of those observations.
