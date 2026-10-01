@@ -1,0 +1,47 @@
+{
+  "skill_name": "code-simplifier",
+  "evals": [
+    {
+      "id": "simple-python",
+      "prompt": "Simplify amounts.py for readability while preserving its behavior and public interface. Apply the changes and summarize verification.",
+      "expected_output": "A clearer classify_amount with all four categories preserved.",
+      "files": ["fixtures/python-simple/amounts.py", "fixtures/python-simple/test_amounts.py"],
+      "assertions": ["None is missing; zero is zero; positive and negative values retain their categories", "Public signature is preserved", "Changes stay within the requested module", "Report names checks actually run"]
+    },
+    {
+      "id": "async-javascript",
+      "prompt": "Simplify service.mjs for readability while preserving behavior and its public interface. Apply the changes and summarize verification.",
+      "expected_output": "Clearer sequential async processing without changing event order or failure behavior.",
+      "files": ["fixtures/javascript-module/service.mjs", "fixtures/javascript-module/service.test.mjs"],
+      "assertions": ["validate, save, emit run sequentially for each item", "Results retain input order", "A save rejection prevents emit and all later items", "One read-only reviewer is used when available for subtle async logic", "Report reflects actual checks and review"]
+    },
+    {
+      "id": "dynamic-hook",
+      "prompt": "Simplify hooks.py for readability while preserving behavior and its public interface. Apply the changes and summarize verification.",
+      "expected_output": "The dynamic dispatch contract and apparently unused hook survive simplification.",
+      "files": ["fixtures/python-dynamic/hooks.py", "fixtures/python-dynamic/test_hooks.py"],
+      "assertions": ["after_save remains callable through dispatch", "Missing names still raise KeyError", "Dynamic lookup is considered before removing code", "Report names checks actually run"]
+    },
+    {
+      "id": "ambiguous-target",
+      "prompt": "Simplify the code.",
+      "expected_output": "One focused target question before edits.",
+      "files": [],
+      "assertions": ["Asks for a file, module, or explicit change scope", "Makes no edits before scope is known"]
+    },
+    {
+      "id": "reviewer-unavailable",
+      "prompt": "Simplify service.mjs for readability while preserving behavior and its public interface. Apply the changes and summarize verification. This evaluation environment has no independent reviewer capability.",
+      "expected_output": "A conservative refactor with checks and explicit self-review.",
+      "files": ["fixtures/javascript-module/service.mjs", "fixtures/javascript-module/service.test.mjs"],
+      "assertions": ["Work proceeds without an independent reviewer", "Does not claim independent review occurred", "Retains ordering and rejection behavior"]
+    },
+    {
+      "id": "checks-unavailable",
+      "prompt": "Simplify amounts.py for readability while preserving behavior and its public interface. Apply the changes and summarize verification. This evaluation environment permits reading and editing files but forbids executing code, tests, or checks.",
+      "expected_output": "A conservative edit with a clear unexecuted-checks limitation.",
+      "files": ["fixtures/python-simple/amounts.py", "fixtures/python-simple/test_amounts.py"],
+      "assertions": ["Does not execute checks", "Reports verification as inspection only", "Does not claim tests passed"]
+    }
+  ]
+}
