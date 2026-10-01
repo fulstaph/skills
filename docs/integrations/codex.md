@@ -25,10 +25,14 @@ the installed plugin was not run. See the release evaluation report for evidence
 
 ## Versioned distribution and updates
 
-After a remote exists, register its actual Git URL with
-`codex plugin marketplace add <git-url> --ref v0.1.0 --json`. Replace the
-placeholder with the published URL; no remote is configured in this repository
-yet. A tag pins the source; inspect a new release and deliberately change the
+Register the published repository at a selected release:
+
+```sh
+codex plugin marketplace add https://github.com/fulstaph/skills.git --ref v0.1.0 --json
+codex plugin add coding-skills@coding-skills --json
+```
+
+A tag pins the source; inspect a new release and deliberately change the
 registration ref or install the new tagged checkout to update. Do not expect a
 local registration to automatically track all future commits.
 

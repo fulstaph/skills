@@ -91,9 +91,10 @@ native adapters. Hosted CI checks metadata and original fixture behavior; it
 does not run paid agent evaluations or authenticated host sessions. These
 evidence categories are reported separately.
 
-This repository is local until publication is requested. To activate hosted
-CI/CD, choose a remote and license, push the reviewed branch, enable Actions,
-and push an approved version tag. No remote URL or license has been selected.
+Source: [fulstaph/skills](https://github.com/fulstaph/skills).
+GitHub runs validation for pull requests and changes to `main`. Pushing a version
+tag runs the release workflow and publishes verified ZIPs with release notes.
+Install from a selected tag and review later releases before updating.
 
 The approved [design](docs/superpowers/specs/2026-10-01-code-simplifier-design.md)
 and [implementation plan](docs/superpowers/plans/2026-10-01-agent-skills-marketplace.md)

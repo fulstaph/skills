@@ -33,8 +33,15 @@ still named `agent-skills-<version>.zip`.
 
 ## Versioned distribution and updates
 
-When published, register the actual Git source or a checked-out release tag.
-For an entirely local pinned install, extract `agent-skills-0.1.0.zip` and
+For a pinned Git installation, clone the published release and register it:
+
+```sh
+git clone --branch v0.1.0 --single-branch https://github.com/fulstaph/skills.git skills-v0.1.0
+claude plugin marketplace add "$PWD/skills-v0.1.0"
+claude plugin install coding-skills@coding-skills
+```
+
+For an archive-based pinned install, extract `agent-skills-0.1.0.zip` and
 register its `agent-skills/` directory. Review later releases before replacing
 the pinned source and reinstalling the bundle. Consult the host's marketplace
 controls for updating registrations rather than assuming local copies refresh.
